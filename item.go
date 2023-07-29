@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	//"runtime/debug"
 	"encoding/json"
 )
 
@@ -32,7 +31,6 @@ type item struct {
 	hasOnlyExtraWearable bool `default:false`
 }
 
-//func (this *item) MarshalJSON() ([]byte, error) {
 func (this *item) toJSON(styleId string) itemGameMap {
 	this.initPrefabs()
 	ret := make(itemGameMap)
