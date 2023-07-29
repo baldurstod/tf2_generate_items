@@ -6,23 +6,32 @@ import (
 	"log"
 	"flag"
 	"fmt"
+	"path"
 )
 var lg language
 
 func main() {
 	var lang string
 	var outputFolder string
-	var inputFolder string
+	var itemsFolder string
+	var resourceFolder string
+	var staticFile string
 	var medals bool
 
 	flag.StringVar(&lang, "l", "english", "Language")
 	flag.BoolVar(&medals, "m", false, "Tournament medals")
 	flag.StringVar(&outputFolder, "o", "", "Output folder")
-	flag.StringVar(&inputFolder, "i", "", "Input folder")
+	flag.StringVar(&itemsFolder, "i", "", "Items folder")
+	flag.StringVar(&resourceFolder, "r", "", "Resource folder")
+	flag.StringVar(&staticFile, "s", "", "Static file")
 	flag.Parse()
 
-	if inputFolder == "" {
-		fmt.Println("No input folder provided. Use the flag -i")
+	if itemsFolder == "" {
+		fmt.Println("No items folder provided. Use the flag -i")
+		os.Exit(1)
+	}
+	if resourceFolder == "" {
+		fmt.Println("No resource folder provided. Use the flag -r")
 		os.Exit(1)
 	}
 	if outputFolder == "" {
@@ -34,11 +43,11 @@ func main() {
 	log.SetOutput(file)
 
 	lg = language{}
-	lg.init(inputFolder + "tf_" + lang + ".txt")
+	lg.init(path.Join(resourceFolder, "tf_" + lang + ".txt"))
 
 	ig := itemsGame{}
 	ig.medals = medals
-	ig.init(inputFolder + "items_game.txt", inputFolder + "static.json")
+	ig.init(path.Join(itemsFolder, "items_game.txt"), staticFile)
 	j, _ := json.MarshalIndent(&ig, "", "\t")
 
 	var prefix string
