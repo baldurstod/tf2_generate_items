@@ -51,7 +51,6 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 	}
 
 	for itemId, itemData := range this.staticData {
-		//fmt.Println(itemId, itemData)
 		it := item{}
 		if it.init(this, itemId, getMap(itemData)) {
 			items[itemId] = &itemStyle{it: &it, styleId: "0"}
