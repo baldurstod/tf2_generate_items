@@ -447,7 +447,6 @@ func (this *item) getStyles() []string {
 								styles = append(styles, "0", "1")
 								this.fakeStyle = true
 								this.hasOnlyExtraWearable = true
-								fmt.Println(this)
 							}
 						}
 					}
@@ -514,7 +513,6 @@ func (this *item) getStringMapSubAttribute(attributePath string, i *itemStringMa
 
 ForLoop:
 	for _, p := range path {
-		//fmt.Println(p)
 		next := current[p]
 		switch next.(type) {
 			case nil:
@@ -606,7 +604,6 @@ func (this *item) getStringSubAttribute(attributePath string) (string, bool) {
 	current := this.m
 ForLoop:
 	for _, p := range path {
-		//fmt.Println(p)
 		next := current[p]
 		switch next.(type) {
 			case nil:
@@ -647,8 +644,6 @@ func (this itemGameMap) getMapStringValue(key string) (string, bool) {
 				return mapValue.(string), true
 			default:
 				return "", false
-				//fmt.Println(this)
-				//panic("Wrong type " + key )
 		}
 	}
 	return "", false
