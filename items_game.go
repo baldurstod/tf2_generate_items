@@ -21,7 +21,7 @@ type collectionMap map[string]stringPair
 
 type itemsGame struct {
 	medals bool `default:false`
-	test itemGameMap
+	itemsVDF itemGameMap
 	Prefabs itemMap
 	Items itemMap
 	itemCollection collectionMap
@@ -63,7 +63,7 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 func (this *itemsGame) MarshalSystems() *itemGameMap {
 	systems := make(itemGameMap)
 
-	particles := getMap(getMap(this.test)["attribute_controlled_attached_particles"])
+	particles := getMap(getMap(this.itemsVDF)["attribute_controlled_attached_particles"])
 	for _, val := range particles {
 		subParticles := getMap(val)
 		for particleId, val := range subParticles {
@@ -190,12 +190,12 @@ func (this *itemsGame) init(path string, staticPath string) {
 
 	vdf := vdf.VDF{}
 	itemsVdf := vdf.Parse(dat)
-	this.test = getMap(itemsVdf["items_game"]);
+	this.itemsVDF = getMap(itemsVdf["items_game"]);
 	this.Prefabs = make(itemMap)
 	this.Items = make(itemMap)
 	this.itemCollection = make(collectionMap)
 
-	prefabs := getMap(getMap(this.test)["prefabs"])
+	prefabs := getMap(getMap(this.itemsVDF)["prefabs"])
 	for key, val := range prefabs {
 		var it = item{}
 		if it.init(this, key, val) {
@@ -203,7 +203,7 @@ func (this *itemsGame) init(path string, staticPath string) {
 		}
 	}
 
-	items := getMap(getMap(this.test)["items"])
+	items := getMap(getMap(this.itemsVDF)["items"])
 	for key, val := range items {
 		var it = item{}
 		if it.init(this, key, val) {
@@ -211,7 +211,7 @@ func (this *itemsGame) init(path string, staticPath string) {
 		}
 	}
 
-	itemCollections := getMap(getMap(this.test)["item_collections"])
+	itemCollections := getMap(getMap(this.itemsVDF)["item_collections"])
 	for _, val := range itemCollections {
 		collection := getMap(val)
 		collectionItems := getMap(collection["items"])
