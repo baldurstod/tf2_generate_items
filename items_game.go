@@ -222,7 +222,7 @@ func (this *itemsGame) init(dat []byte, staticPath string) {
 	if itemCollections, ok := this.itemsVDF.Get("item_collections"); ok {
 		for _, collection := range itemCollections.GetChilds() {
 
-			collectionName := collection.key
+			collectionName, _ := collection.GetString("name")
 			if collectionItems, ok := collection.Get("items"); ok {
 				for _, grade := range collectionItems.GetChilds() {
 					if gradeItems, ok := grade.ToStringMap(); ok {
