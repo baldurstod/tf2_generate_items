@@ -153,15 +153,13 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// equip_regions
 	var equipRegions = make(itemStringMap)
-	//panic("do equipRegions")
-	/*if v := this.m["equip_regions"]; v != nil {
-		mapValue := itemGameMap((v).(map[string]interface{}))
-		for key, val := range mapValue {
+	if sm, ok :=this.kv.GetStringMap("equip_regions"); ok {
+		for key, val := range *sm {
 			if val == "1" {
 				equipRegions[key] = "1"
 			}
 		}
-	}*/
+	}
 
 	// equip_region
 	// sometimes equip_region is an array
@@ -498,21 +496,14 @@ func (this *item) initPrefabs() {
 }
 
 func (this *item) getStringMapAttribute(attributeName string, i *itemStringMap) {
-	if v, ok := this.kv.Get(attributeName); ok {
-		switch v.value.(type) {
-		case map[string]interface{}:
-			mapValue := itemGameMap((v.value).(map[string]interface{}))
-			for key, val := range mapValue {
-				switch val.(type) {
-				case string:
-					(*i)[key] = val.(string)
-				}
-			}
-		}
-	}
-
 	for _, prefab := range this.prefabs {
 		prefab.getStringMapAttribute(attributeName, i)
+	}
+
+	if sm, ok := this.kv.GetStringMap(attributeName); ok {
+		for key, val := range *sm {
+			(*i)[key] = val
+		}
 	}
 }
 
