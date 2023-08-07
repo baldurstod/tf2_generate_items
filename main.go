@@ -47,7 +47,8 @@ func main() {
 
 	ig := itemsGame{}
 	ig.medals = medals
-	ig.init(path.Join(itemsFolder, "items_game.txt"), staticFile)
+	dat, _ := os.ReadFile(path.Join(itemsFolder, "items_game.txt"))
+	ig.init(dat, staticFile)
 	j, _ := json.MarshalIndent(&ig, "", "\t")
 
 	var prefix string
@@ -59,13 +60,13 @@ func main() {
 	os.WriteFile(outputFolder + prefix + "_" + lang + ".json", j, 0666)
 }
 
-func getMap(i interface{}) itemGameMap {
+/*func getMap(i interface{}) itemGameMap {
 	switch i.(type) {
 	case itemGameMap: return i.(itemGameMap)
 	case map[string]interface{}: return itemGameMap((i).(map[string]interface{}))
 	default: panic("Unknown type")
 	}
-}
+}*/
 
 func getStringToken(token string) string {
 	s, exist := lg.getToken(token)

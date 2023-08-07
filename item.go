@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "reflect"
 	"strconv"
 	"strings"
 	"encoding/json"
@@ -25,7 +26,7 @@ type item struct {
 	prefabs []*item
 	isPrefabsInitialized bool `default:false`
 	UsedByClasses map[string]int
-	m itemGameMap
+	kv *KeyValue
 	fakeStyle bool `default:false`
 	isCanteen bool `default:false`
 	hasOnlyExtraWearable bool `default:false`
@@ -77,7 +78,7 @@ func (this *item) toJSON(styleId string) itemGameMap {
 		}
 	}
 
-	usedByClasses := make(itemStringMap)
+	/*usedByClasses := make(itemStringMap)
 	usedByClassesLower := make(itemStringMap)
 	this.getStringMapAttribute("used_by_classes", &usedByClasses)
 	if len(usedByClasses) > 0 {
@@ -85,6 +86,15 @@ func (this *item) toJSON(styleId string) itemGameMap {
 			usedByClassesLower[strings.ToLower(key)] = val
 		}
 		ret["used_by_classes"] = usedByClassesLower
+	}*/
+	if usedByClasses, ok :=this.kv.GetStringMap("used_by_classes"); ok {
+		if len(*usedByClasses) > 0 {
+			usedByClassesLower := make(map[string]string)
+			for key, val := range *usedByClasses {
+				usedByClassesLower[strings.ToLower(key)] = val
+			}
+			ret["used_by_classes"] = usedByClassesLower
+		}
 	}
 
 	// model_player
@@ -107,7 +117,7 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// model_player_per_class
 	modelPlayerPerClass := make(itemStringMap)
-	this.getStringMapSubAttribute("visuals.styles." + styleId + ".model_player_per_class", &modelPlayerPerClass)
+	this.getStringMapSubAttribute([]string{"visuals", "styles", styleId, "model_player_per_class"}, &modelPlayerPerClass)
 	if len(modelPlayerPerClass) > 0 {
 		ret["model_player_per_class"] = modelPlayerPerClass
 	} else {
@@ -119,7 +129,7 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// model_player_per_class_red
 	modelPlayerPerClassRed := make(itemStringMap)
-	this.getStringMapSubAttribute("visuals.styles." + styleId + ".model_player_per_class_red", &modelPlayerPerClassRed)
+	this.getStringMapSubAttribute([]string{"visuals", "styles", styleId, "model_player_per_class_red"}, &modelPlayerPerClassRed)
 	if len(modelPlayerPerClassRed) > 0 {
 		ret["model_player_per_class_red"] = modelPlayerPerClassRed
 	} else {
@@ -131,7 +141,7 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// model_player_per_class_blue
 	modelPlayerPerClassBlue := make(itemStringMap)
-	this.getStringMapSubAttribute("visuals.styles." + styleId + ".model_player_per_class_blue", &modelPlayerPerClassBlue)
+	this.getStringMapSubAttribute([]string{"visuals", "styles", styleId, "model_player_per_class_blue"}, &modelPlayerPerClassBlue)
 	if len(modelPlayerPerClassBlue) > 0 {
 		ret["model_player_per_class_blue"] = modelPlayerPerClassBlue
 	} else {
@@ -143,14 +153,15 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// equip_regions
 	var equipRegions = make(itemStringMap)
-	if v := this.m["equip_regions"]; v != nil {
+	//panic("do equipRegions")
+	/*if v := this.m["equip_regions"]; v != nil {
 		mapValue := itemGameMap((v).(map[string]interface{}))
 		for key, val := range mapValue {
 			if val == "1" {
 				equipRegions[key] = "1"
 			}
 		}
-	}
+	}*/
 
 	// equip_region
 	// sometimes equip_region is an array
@@ -188,8 +199,8 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	//player_bodygroups
 	playerBodygroups := make(itemStringMap)
-	this.getStringMapSubAttribute("visuals.player_bodygroups", &playerBodygroups)
-	this.getStringMapSubAttribute("visuals.styles." + styleId + ".additional_hidden_bodygroups", &playerBodygroups)
+	this.getStringMapSubAttribute([]string{"visuals", "player_bodygroups"}, &playerBodygroups)
+	this.getStringMapSubAttribute([]string{"visuals", "styles", styleId, "additional_hidden_bodygroups"}, &playerBodygroups)
 	if len(playerBodygroups) > 0 {
 		for _, val := range playerBodygroups {
 			if val == "1" {
@@ -221,36 +232,36 @@ func (this *item) toJSON(styleId string) itemGameMap {
 	}
 
 	// custom_taunt_scene_per_class
-	customTauntScenePerClass := make(itemGameMap)
-	this.getSubAttribute("taunt.custom_taunt_scene_per_class", &customTauntScenePerClass)
+	customTauntScenePerClass := make(itemStringMap)
+	this.getStringMapSubAttribute([]string{"taunt", "custom_taunt_scene_per_class"}, &customTauntScenePerClass)
 	if len(customTauntScenePerClass) > 0 {
 		ret["custom_taunt_scene_per_class"] = customTauntScenePerClass
 	}
 
 	// custom_taunt_prop_scene_per_class
 	customTauntPropScenePerClass := make(itemStringMap)
-	this.getStringMapSubAttribute("taunt.custom_taunt_prop_scene_per_class", &customTauntPropScenePerClass)
+	this.getStringMapSubAttribute([]string{"taunt", "custom_taunt_prop_scene_per_class"}, &customTauntPropScenePerClass)
 	if len(customTauntPropScenePerClass) > 0 {
 		ret["custom_taunt_prop_scene_per_class"] = customTauntPropScenePerClass
 	}
 
 	// custom_taunt_outro_scene_per_class
 	customTauntOutroScenePerClass := make(itemStringMap)
-	this.getStringMapSubAttribute("taunt.custom_taunt_outro_scene_per_class", &customTauntOutroScenePerClass)
+	this.getStringMapSubAttribute([]string{"taunt", "custom_taunt_outro_scene_per_class"}, &customTauntOutroScenePerClass)
 	if len(customTauntOutroScenePerClass) > 0 {
 		ret["custom_taunt_outro_scene_per_class"] = customTauntOutroScenePerClass
 	}
 
 	// custom_taunt_prop_outro_scene_per_class
 	customTauntPropOutroScenePerClass := make(itemStringMap)
-	this.getStringMapSubAttribute("taunt.custom_taunt_prop_outro_scene_per_class", &customTauntPropOutroScenePerClass)
+	this.getStringMapSubAttribute([]string{"taunt", "custom_taunt_prop_outro_scene_per_class"}, &customTauntPropOutroScenePerClass)
 	if len(customTauntPropOutroScenePerClass) > 0 {
 		ret["custom_taunt_prop_outro_scene_per_class"] = customTauntPropOutroScenePerClass
 	}
 
 	// custom_taunt_prop_per_class
 	customTauntPropPerClass := make(itemStringMap)
-	this.getStringMapSubAttribute("taunt.custom_taunt_prop_per_class", &customTauntPropPerClass)
+	this.getStringMapSubAttribute([]string{"taunt", "custom_taunt_prop_per_class"}, &customTauntPropPerClass)
 	if len(customTauntPropPerClass) > 0 {
 		ret["custom_taunt_prop_per_class"] = customTauntPropPerClass
 	}
@@ -464,19 +475,18 @@ func (this *item) getStyles() []string {
 	return styles
 }
 
-func (this *item) init(ig *itemsGame, key string, val interface{}) bool {
+func (this *item) init(ig *itemsGame, kv *KeyValue) bool {
 	this.ig = ig
-	this.Id = key
+	this.Id = kv.key
+	this.kv = kv
 
-	m := getMap(val)
-	this.m = m
 	return true
 }
 
 func (this *item) initPrefabs() {
 	if !this.isPrefabsInitialized {
 		this.isPrefabsInitialized = true
-		if s, ok := this.m.getMapStringValue("prefab"); ok {
+		if s, ok := this.kv.GetString("prefab"); ok {
 			prefabs := strings.Split(s, " ")
 			for _, prefabName := range prefabs {
 				prefab := this.ig.getPrefab(prefabName)
@@ -488,10 +498,10 @@ func (this *item) initPrefabs() {
 }
 
 func (this *item) getStringMapAttribute(attributeName string, i *itemStringMap) {
-	if v := this.m[attributeName]; v != nil {
-		switch v.(type) {
+	if v, ok := this.kv.Get(attributeName); ok {
+		switch v.value.(type) {
 		case map[string]interface{}:
-			mapValue := itemGameMap((v).(map[string]interface{}))
+			mapValue := itemGameMap((v.value).(map[string]interface{}))
 			for key, val := range mapValue {
 				switch val.(type) {
 				case string:
@@ -506,87 +516,35 @@ func (this *item) getStringMapAttribute(attributeName string, i *itemStringMap) 
 	}
 }
 
-func (this *item) getStringMapSubAttribute(attributePath string, i *itemStringMap) {
-	path := strings.Split(attributePath, ".")
-
-	current := this.m
-
-ForLoop:
-	for _, p := range path {
-		next := current[p]
-		switch next.(type) {
-			case nil:
-				current = nil
-				break ForLoop
-			case map[string]interface{}:
-				current = itemGameMap((next).(map[string]interface{}))
-			case string:
-				panic("Found a string " + attributePath + this.Id)
-			default:
-				fmt.Println(next)
-				panic("Unknown type")
-		}
-		current = itemGameMap((next).(map[string]interface{}))
-	}
-
+func (this *item) getStringMapSubAttribute(path []string, i *itemStringMap) {
 	for _, prefab := range this.prefabs {
-		prefab.getStringMapSubAttribute(attributePath, i)
+		prefab.getStringMapSubAttribute(path, i)
 	}
 
-	if current != nil {
-		for key, val := range current {
-			switch val.(type) {
-			case string:
-				(*i)[key] = val.(string)
-			}
+	if sm, ok := this.kv.GetSubElementStringMap(path); ok {
+		for key, val := range *sm {
+			(*i)[key] = val
 		}
 	}
-
-	return
 }
 
 func (this *item) getSubAttribute(attributePath string, i *itemGameMap) {
 	path := strings.Split(attributePath, ".")
 
-	current := this.m
-
-ForLoop:
-	for _, p := range path {
-		next := current[p]
-		switch next.(type) {
-			case nil:
-				current = nil
-				break ForLoop
-			case map[string]interface{}:
-				current = itemGameMap((next).(map[string]interface{}))
-			case string:
-				//return next.(string), true
-				panic("Found a string " + attributePath + this.Id)
-			default:
-				fmt.Println(next)
-				panic("Unknown type")
-		}
-		current = itemGameMap((next).(map[string]interface{}))
-	}
 	for _, prefab := range this.prefabs {
 		prefab.getSubAttribute(attributePath, i)
 	}
 
-	if current != nil {
-		for key, val := range current {
-			switch val.(type) {
-			case map[string]interface{}: (*i)[key] = itemGameMap((val).(map[string]interface{}))
-			case string: (*i)[key] = val.(string)
-			}
+	if kv, ok := this.kv.GetSubElement(path); ok {
+		for _, val := range kv.GetChilds() {
+			(*i)[val.key] = val
 		}
 	}
-
-	return
 }
 
 
 func (this *item) getStringAttribute(attributeName string) (string, bool) {
-	if s, ok := this.m.getMapStringValue(attributeName); ok {
+	if s, ok := this.kv.GetString(attributeName); ok {
 		return s, true
 	}
 
@@ -601,22 +559,26 @@ func (this *item) getStringAttribute(attributeName string) (string, bool) {
 func (this *item) getStringSubAttribute(attributePath string) (string, bool) {
 	path := strings.Split(attributePath, ".")
 
-	current := this.m
+	current := this.kv
 ForLoop:
 	for _, p := range path {
-		next := current[p]
-		switch next.(type) {
+		next, ok := current.Get(p)
+		if !ok {
+			break ForLoop
+		}
+		switch next.value.(type) {
 			case nil:
 				break ForLoop
-			case map[string]interface{}:
-				current = itemGameMap((next).(map[string]interface{}))
+			case []*KeyValue:
+				//current = itemGameMap((next).(map[string]interface{}))
+				current = next//(next.value).(*KeyValue)
 			case string:
-				return next.(string), true
+				return next.value.(string), true
 			default:
 				fmt.Println(next)
 				panic("Unknown type")
 		}
-		current = itemGameMap((next).(map[string]interface{}))
+		//current = (next.value).(*KeyValue)//current = itemGameMap((next).(map[string]interface{}))
 	}
 
 	for _, prefab := range this.prefabs {
@@ -626,6 +588,19 @@ ForLoop:
 	}
 
 	return "", false
+}
+
+func (this *item) getUsedByClasses() []string {
+	ret := []string{}
+
+	if usedByClasses, ok := this.kv.GetStringMap("used_by_classes"); ok {
+		for key, val := range *usedByClasses {
+			if val == "1" {
+				ret = append(ret, key)
+			}
+		}
+	}
+	return ret
 }
 
 type itemStyle struct {

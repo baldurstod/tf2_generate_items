@@ -2,25 +2,37 @@ package main
 
 import (
 	"strings"
-	"github.com/baldurstod/vdf"
+	//"github.com/baldurstod/vdf"
 )
 
 type language struct {
 	lang string
-	tokens itemStringMap
+	tokens map[string]string
 }
 
 func (this *language) init(path string) {
 	dat, _ := ReadFileUTF16(path)
-	vdf := vdf.VDF{}
-	languageVdf := itemGameMap(vdf.Parse(dat))
+	vdf := VDF{}
+	languageVdf := vdf.Parse(dat)
 
-	lang := getMap(getMap(languageVdf)["lang"])
-	this.lang = (lang["Language"]).(string)
-	this.tokens = make(itemStringMap)
+	lang, ok := languageVdf.Get("lang")
+	if !ok {
+		panic("lang key not found")
+	}
+	language, ok := lang.GetString("Language")
+	if !ok {
+		panic("Language key not found")
+	}
 
-	for key, val := range getMap(lang["Tokens"]) {
-		this.tokens[strings.ToLower(key)] = val.(string)
+	tokens, ok := lang.Get("Tokens")
+	if !ok {
+		panic("Tokens key not found")
+	}
+
+	this.lang = language
+	this.tokens = make(map[string]string)
+	for _, val := range tokens.value.([]*KeyValue) {
+		this.tokens[strings.ToLower(val.key)] = val.value.(string)
 	}
 }
 

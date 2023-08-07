@@ -1,11 +1,12 @@
 package main
 
 import (
+	_ "fmt"
 	"os"
 	"strings"
 	"strconv"
 	"encoding/json"
-	"github.com/baldurstod/vdf"
+	//"github.com/baldurstod/vdf"
 )
 
 type itemMap map[string]*item
@@ -21,7 +22,7 @@ type collectionMap map[string]stringPair
 
 type itemsGame struct {
 	medals bool `default:false`
-	itemsVDF itemGameMap
+	itemsVDF *KeyValue
 	Prefabs itemMap
 	Items itemMap
 	itemCollection collectionMap
@@ -41,6 +42,7 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 	items := make(itemStyleMap)
 	for itemId, item := range *this.getItems() {
 		styles := item.getStyles()
+		//fmt.Println(len(styles))
 		if len(styles) > 1 {
 			for _, styleId := range styles {
 				items[itemId + "~" + styleId] = &itemStyle{it: item, styleId: styleId}
@@ -50,12 +52,12 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 		}
 	}
 
-	for itemId, itemData := range this.staticData {
+	/*for itemId, itemData := range this.staticData {
 		it := item{}
 		if it.init(this, itemId, getMap(itemData)) {
 			items[itemId] = &itemStyle{it: &it, styleId: "0"}
 		}
-	}
+	}*/
 
 	return &items
 }
@@ -63,22 +65,23 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 func (this *itemsGame) MarshalSystems() *itemGameMap {
 	systems := make(itemGameMap)
 
-	particles := getMap(getMap(this.itemsVDF)["attribute_controlled_attached_particles"])
-	for _, val := range particles {
-		subParticles := getMap(val)
-		for particleId, val := range subParticles {
-			systems[particleId] = getMap(val)
+	if particlesList, ok := this.itemsVDF.Get("attribute_controlled_attached_particles"); ok {
+		for _, particlesGroups := range particlesList.GetChilds() {
+			for _, particle := range particlesGroups.GetChilds() {
+				particleId := particle.key
+				particleSystem, _ := particle.ToStringMap()
+				systems[particleId] = particleSystem
 
-			if s, ok := getStringTokenRaw("Attrib_Particle" + particleId); ok {
-				getMap(systems[particleId])["name"] = s
-			} else {
-				if s, ok := getStringTokenRaw("Attrib_KillStreakEffect" + particleId); ok {
-					getMap(systems[particleId])["name"] = s
+				if s, ok := getStringTokenRaw("Attrib_Particle" + particleId); ok {
+					(*particleSystem)["name"] = s
+				} else {
+					if s, ok := getStringTokenRaw("Attrib_KillStreakEffect" + particleId); ok {
+						(*particleSystem)["name"] = s
+					}
 				}
 			}
 		}
 	}
-
 
 	return &systems
 }
@@ -87,57 +90,63 @@ func (this *itemsGame) getItems() (*itemMap) {
 	items := make(itemMap)
 
 	for itemId, item := range this.Items {
-		if !this.filterOut(item, !this.medals) {
+
+		/*if itemId == "462" {
+			fmt.Println(item.kv)
+			fmt.Println(this.filterOut(item, !this.medals))
+		}*/
+
+		if ok, _ := this.filterOut(item, !this.medals); !ok {
 			items[itemId] = item
 		}
 	}
 	return &items
 }
 
-func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool) {
+func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
 	it.initPrefabs()
 
 	itemId, _ := strconv.Atoi(it.Id)
 
 	if itemId == 5838 { //Winter 2015 Mystery Box
-		return true
+		return true, "item is id 5838"
 	}
 
 	// Filter medals
 	if s, ok := it.getStringAttribute("item_type_name"); ok {
 		if filterMedals {
 			if s == "#TF_Wearable_TournamentMedal" {
-				return true
+				return true, "item is tournament medal"
 			}
 		} else {
 			if s != "#TF_Wearable_TournamentMedal" {
-				return true
+				return true, "item is not tournament medal"
 			}
 		}
 	}
 
 	if s, ok := it.getStringAttribute("item_name"); ok {
 		if s == "#TF_Item_Zombie_Armory" {
-			return true
+			return true, "item is zombie armory"
 		}
 	}
 
 	if s, ok := it.getStringAttribute("name"); ok {
 		if strings.Contains(s, "Autogrant") {
-			return true
+			return true, "item is autogrant"
 		}
 	}
 
 	if s, ok := it.getStringAttribute("item_class"); ok {
 		if s == "tf_weapon_invis" {
-			return true
+			return true, "item is watch"
 		}
 	}
 
 	if s, ok := it.getStringAttribute("baseitem"); ok {
 		if s == "1" {
 			if itemId != 26 && itemId != 27 {//destruction PDA and disguise kit
-				return true;
+				return true, "item is base item"
 			}
 		}
 	}
@@ -148,7 +157,7 @@ func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool) {
 			if s, ok := it.getStringAttribute("name"); ok && s != "Duck Badge" {
 				if itemId == 294 || (itemId >= 831 && itemId <= 838) || (itemId >= 30739 && itemId <= 30741) {
 				} else {
-					return true
+					return true, "item doesn't have show_in_armory flag"
 				}
 			}
 		}
@@ -160,72 +169,68 @@ func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool) {
 			if _, ok := it.getStringAttribute("extra_wearable"); !ok {
 				if itemSlot, ok := it.getStringAttribute("item_slot"); ok {
 					if strings.Contains(itemSlot, "action") {
-						return true
+						return true, "item doesn't have a model and item_slot is action"
 					}
 				} else {
-					return true
+					return true, "item doesn't have a model nor an item_slot"
 				}
 			}
 		}
 	}
 
-	usedByClasses := make(itemStringMap)
-	it.getStringMapAttribute("used_by_classes", &usedByClasses)
+	usedByClasses := it.getUsedByClasses()
 	if len(usedByClasses) == 0 {
-		return true
+		return true, "item is used by no one"
 	}
 
-
-
-	return false
+	return false, ""
 }
 
-func (this *itemsGame) init(path string, staticPath string) {
+func (this *itemsGame) init(dat []byte, staticPath string) {
 	this.staticData = make(itemGameMap)
-	dat, _ := os.ReadFile(path)
+	//dat, _ := os.ReadFile(path)
 	if !this.medals {
 		staticContent, _ := os.ReadFile(staticPath)
 		_ = json.Unmarshal(staticContent, &this.staticData)
 	}
 
-	vdf := vdf.VDF{}
-	itemsVdf := vdf.Parse(dat)
-	this.itemsVDF = getMap(itemsVdf["items_game"]);
+	vdf := VDF{}
+	root := vdf.Parse(dat)
+	this.itemsVDF, _ = root.Get("items_game")
 	this.Prefabs = make(itemMap)
 	this.Items = make(itemMap)
 	this.itemCollection = make(collectionMap)
 
-	prefabs := getMap(getMap(this.itemsVDF)["prefabs"])
-	for key, val := range prefabs {
-		var it = item{}
-		if it.init(this, key, val) {
-			this.Prefabs[it.Id] = &it
+	if prefabs, ok := this.itemsVDF.Get("prefabs"); ok {
+		for _, val := range prefabs.GetChilds() {
+			var it = item{}
+			if it.init(this, val) {
+				this.Prefabs[it.Id] = &it
+			}
 		}
 	}
 
-	items := getMap(getMap(this.itemsVDF)["items"])
-	for key, val := range items {
-		var it = item{}
-		if it.init(this, key, val) {
-			this.Items[it.Id] = &it
+	if items, ok := this.itemsVDF.Get("items"); ok {
+		for _, val := range items.GetChilds() {
+			var it = item{}
+			if it.init(this, val) {
+				this.Items[it.Id] = &it
+			}
 		}
 	}
 
-	itemCollections := getMap(getMap(this.itemsVDF)["item_collections"])
-	for _, val := range itemCollections {
-		collection := getMap(val)
-		collectionItems := getMap(collection["items"])
-		collectionName := collection["name"].(string)
+	if itemCollections, ok := this.itemsVDF.Get("item_collections"); ok {
+		for _, collection := range itemCollections.GetChilds() {
 
-		for gradeName, val := range collectionItems {
-			switch val.(type) {
-			case map[string]interface{}:
-				gradeItems := itemGameMap((val).(map[string]interface{}))
-
-				for itemName, _ := range gradeItems {
-					this.itemCollection[itemName] = stringPair{s1: collectionName, s2: gradeName}
+			collectionName := collection.key
+			if collectionItems, ok := collection.Get("items"); ok {
+				for _, grade := range collectionItems.GetChilds() {
+					if gradeItems, ok := grade.ToStringMap(); ok {
+						for itemName, _ := range *gradeItems {
+							this.itemCollection[itemName] = stringPair{s1: collectionName, s2: grade.key}
+						}
+					}
 				}
-
 			}
 		}
 	}
