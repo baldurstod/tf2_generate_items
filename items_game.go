@@ -1,8 +1,6 @@
 package main
 
 import (
-	_ "fmt"
-	"os"
 	"strings"
 	"strconv"
 	"encoding/json"
@@ -23,10 +21,10 @@ type collectionMap map[string]stringPair
 type itemsGame struct {
 	medals bool `default:false`
 	itemsVDF *KeyValue
+	staticVDF *KeyValue
 	Prefabs itemMap
 	Items itemMap
 	itemCollection collectionMap
-	staticData itemGameMap
 }
 
 func (this *itemsGame) MarshalJSON() ([]byte, error) {
@@ -51,13 +49,6 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 			items[itemId] = &itemStyle{it: item, styleId: "0"}
 		}
 	}
-
-	/*for itemId, itemData := range this.staticData {
-		it := item{}
-		if it.init(this, itemId, getMap(itemData)) {
-			items[itemId] = &itemStyle{it: &it, styleId: "0"}
-		}
-	}*/
 
 	return &items
 }
@@ -180,14 +171,7 @@ func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
 	return false, ""
 }
 
-func (this *itemsGame) init(dat []byte, staticPath string) {
-	this.staticData = make(itemGameMap)
-	//dat, _ := os.ReadFile(path)
-	if !this.medals {
-		staticContent, _ := os.ReadFile(staticPath)
-		_ = json.Unmarshal(staticContent, &this.staticData)
-	}
-
+func (this *itemsGame) init(dat []byte, staticDat []byte) {
 	vdf := VDF{}
 	root := vdf.Parse(dat)
 	this.itemsVDF, _ = root.Get("items_game")
@@ -209,6 +193,22 @@ func (this *itemsGame) init(dat []byte, staticPath string) {
 			var it = item{}
 			if it.init(this, val) {
 				this.Items[it.Id] = &it
+			}
+		}
+	}
+
+	// Static file is loaded after to overwrite items_game
+	if !this.medals {
+		vdf := VDF{}
+		staticRoot := vdf.Parse(staticDat)
+		staticItemsVDF, _ := staticRoot.Get("items_game")
+
+		if items, ok := staticItemsVDF.Get("items"); ok {
+			for _, val := range items.GetChilds() {
+				var it = item{}
+				if it.init(this, val) {
+					this.Items[it.Id] = &it
+				}
 			}
 		}
 	}

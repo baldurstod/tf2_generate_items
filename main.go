@@ -48,7 +48,12 @@ func main() {
 	ig := itemsGame{}
 	ig.medals = medals
 	dat, _ := os.ReadFile(path.Join(itemsFolder, "items_game.txt"))
-	ig.init(dat, staticFile)
+	dat2 := []byte{}
+	if staticFile != "" {
+		dat2, _ = os.ReadFile(staticFile)
+	}
+
+	ig.init(dat, dat2)
 	j, _ := json.MarshalIndent(&ig, "", "\t")
 
 	var prefix string
