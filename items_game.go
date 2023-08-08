@@ -4,7 +4,7 @@ import (
 	"strings"
 	"strconv"
 	"encoding/json"
-	//"github.com/baldurstod/vdf"
+	"github.com/baldurstod/vdf"
 )
 
 type itemMap map[string]*item
@@ -20,8 +20,8 @@ type collectionMap map[string]stringPair
 
 type itemsGame struct {
 	medals bool `default:false`
-	itemsVDF *KeyValue
-	staticVDF *KeyValue
+	itemsVDF *vdf.KeyValue
+	staticVDF *vdf.KeyValue
 	Prefabs itemMap
 	Items itemMap
 	itemCollection collectionMap
@@ -59,7 +59,7 @@ func (this *itemsGame) MarshalSystems() *itemGameMap {
 	if particlesList, ok := this.itemsVDF.Get("attribute_controlled_attached_particles"); ok {
 		for _, particlesGroups := range particlesList.GetChilds() {
 			for _, particle := range particlesGroups.GetChilds() {
-				particleId := particle.key
+				particleId := particle.Key
 				particleSystem, _ := particle.ToStringMap()
 				systems[particleId] = particleSystem
 
@@ -172,8 +172,8 @@ func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
 }
 
 func (this *itemsGame) init(dat []byte, staticDat []byte) {
-	vdf := VDF{}
-	root := vdf.Parse(dat)
+	v := vdf.VDF{}
+	root := v.Parse(dat)
 	this.itemsVDF, _ = root.Get("items_game")
 	this.Prefabs = make(itemMap)
 	this.Items = make(itemMap)
@@ -199,8 +199,8 @@ func (this *itemsGame) init(dat []byte, staticDat []byte) {
 
 	// Static file is loaded after to overwrite items_game
 	if !this.medals {
-		vdf := VDF{}
-		staticRoot := vdf.Parse(staticDat)
+		v := vdf.VDF{}
+		staticRoot := v.Parse(staticDat)
 		staticItemsVDF, _ := staticRoot.Get("items_game")
 
 		if items, ok := staticItemsVDF.Get("items"); ok {
@@ -221,7 +221,7 @@ func (this *itemsGame) init(dat []byte, staticDat []byte) {
 				for _, grade := range collectionItems.GetChilds() {
 					if gradeItems, ok := grade.ToStringMap(); ok {
 						for itemName, _ := range *gradeItems {
-							this.itemCollection[itemName] = stringPair{s1: collectionName, s2: grade.key}
+							this.itemCollection[itemName] = stringPair{s1: collectionName, s2: grade.Key}
 						}
 					}
 				}

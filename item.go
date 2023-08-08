@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"encoding/json"
+	"github.com/baldurstod/vdf"
 )
 
 var ITEM_FIELDS = [...]string{"image_inventory", /*"item_class",*/ "item_slot"/*, /*"item_type_name"/*, "item_quality"*/, "holiday_restriction", "anim_slot", "particle_suffix", "extra_wearable"}
@@ -26,7 +27,7 @@ type item struct {
 	prefabs []*item
 	isPrefabsInitialized bool `default:false`
 	UsedByClasses map[string]int
-	kv *KeyValue
+	kv *vdf.KeyValue
 	fakeStyle bool `default:false`
 	isCanteen bool `default:false`
 	hasOnlyExtraWearable bool `default:false`
@@ -464,9 +465,9 @@ func (this *item) getStyles() []string {
 	return styles
 }
 
-func (this *item) init(ig *itemsGame, kv *KeyValue) bool {
+func (this *item) init(ig *itemsGame, kv *vdf.KeyValue) bool {
 	this.ig = ig
-	this.Id = kv.key
+	this.Id = kv.Key
 	this.kv = kv
 
 	return true
@@ -517,7 +518,7 @@ func (this *item) getSubAttribute(path []string, i *itemGameMap) {
 
 	if kv, ok := this.kv.GetSubElement(path); ok {
 		for _, val := range kv.GetChilds() {
-			(*i)[val.key] = val
+			(*i)[val.Key] = val
 		}
 	}
 }
