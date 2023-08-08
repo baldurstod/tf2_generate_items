@@ -550,26 +550,10 @@ func (this *item) getStringAttribute(attributeName string) (string, bool) {
 func (this *item) getStringSubAttribute(attributePath string) (string, bool) {
 	path := strings.Split(attributePath, ".")
 
-	current := this.kv
-ForLoop:
-	for _, p := range path {
-		next, ok := current.Get(p)
-		if !ok {
-			break ForLoop
+	if kv, ok := this.kv.GetSubElement(path); ok {
+		if s, ok := kv.ToString(); ok {
+			return s, true
 		}
-		switch next.value.(type) {
-			case nil:
-				break ForLoop
-			case []*KeyValue:
-				//current = itemGameMap((next).(map[string]interface{}))
-				current = next//(next.value).(*KeyValue)
-			case string:
-				return next.value.(string), true
-			default:
-				fmt.Println(next)
-				panic("Unknown type")
-		}
-		//current = (next.value).(*KeyValue)//current = itemGameMap((next).(map[string]interface{}))
 	}
 
 	for _, prefab := range this.prefabs {
@@ -577,7 +561,6 @@ ForLoop:
 			return s, true
 		}
 	}
-
 	return "", false
 }
 
