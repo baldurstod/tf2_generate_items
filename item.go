@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	_ "fmt"
 	_ "reflect"
 	"strconv"
 	"strings"
@@ -78,23 +78,14 @@ func (this *item) toJSON(styleId string) itemGameMap {
 		}
 	}
 
-	/*usedByClasses := make(itemStringMap)
-	usedByClassesLower := make(itemStringMap)
+	usedByClasses := make(itemStringMap)
 	this.getStringMapAttribute("used_by_classes", &usedByClasses)
 	if len(usedByClasses) > 0 {
+		usedByClassesLower := make(itemStringMap)
 		for key, val := range usedByClasses {
 			usedByClassesLower[strings.ToLower(key)] = val
 		}
 		ret["used_by_classes"] = usedByClassesLower
-	}*/
-	if usedByClasses, ok :=this.kv.GetStringMap("used_by_classes"); ok {
-		if len(*usedByClasses) > 0 {
-			usedByClassesLower := make(map[string]string)
-			for key, val := range *usedByClasses {
-				usedByClassesLower[strings.ToLower(key)] = val
-			}
-			ret["used_by_classes"] = usedByClassesLower
-		}
 	}
 
 	// model_player
@@ -567,11 +558,11 @@ func (this *item) getStringSubAttribute(attributePath string) (string, bool) {
 func (this *item) getUsedByClasses() []string {
 	ret := []string{}
 
-	if usedByClasses, ok := this.kv.GetStringMap("used_by_classes"); ok {
-		for key, val := range *usedByClasses {
-			if val == "1" {
-				ret = append(ret, key)
-			}
+	usedByClasses := make(itemStringMap)
+	this.getStringMapAttribute("used_by_classes", &usedByClasses)
+	if len(usedByClasses) > 0 {
+		for key, _ := range usedByClasses {
+			ret = append(ret, strings.ToLower(key))
 		}
 	}
 	return ret
