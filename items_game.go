@@ -90,12 +90,6 @@ func (this *itemsGame) getItems() (*itemMap) {
 	items := make(itemMap)
 
 	for itemId, item := range this.Items {
-
-		/*if itemId == "462" {
-			fmt.Println(item.kv)
-			fmt.Println(this.filterOut(item, !this.medals))
-		}*/
-
 		if ok, _ := this.filterOut(item, !this.medals); !ok {
 			items[itemId] = item
 		}
