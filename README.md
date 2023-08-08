@@ -7,9 +7,9 @@ linux
 # Usage
 `tf2_generate_items -o <outputdir> -i <itemsdir> -r <resourcedir> -m=<0|1> -l <lang>`
 
-itemsdir is usually <TF2 INSTALL DIR>/scripts/items/
+itemsdir is usually \<TF2 INSTALL DIR\>/scripts/items/
 
-resourcedir is usually <TF2 INSTALL DIR>/resource/
+resourcedir is usually \<TF2 INSTALL DIR\>/resource/
 
 lang can be any supported tf2 language
 
