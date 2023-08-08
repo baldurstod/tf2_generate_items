@@ -221,8 +221,8 @@ func (this *item) toJSON(styleId string) itemGameMap {
 	}
 
 	// custom_taunt_scene_per_class
-	customTauntScenePerClass := make(itemStringMap)
-	this.getStringMapSubAttribute([]string{"taunt", "custom_taunt_scene_per_class"}, &customTauntScenePerClass)
+	customTauntScenePerClass := make(itemGameMap)
+	this.getSubAttribute([]string{"taunt", "custom_taunt_scene_per_class"}, &customTauntScenePerClass)
 	if len(customTauntScenePerClass) > 0 {
 		ret["custom_taunt_scene_per_class"] = customTauntScenePerClass
 	}
@@ -409,7 +409,7 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// attached_particlesystems
 	attachedParticlesystems := make(itemGameMap)
-	this.getSubAttribute("visuals.attached_particlesystems", &attachedParticlesystems);
+	this.getSubAttribute([]string{"visuals", "attached_particlesystems"}, &attachedParticlesystems);
 	if len(attachedParticlesystems) > 0 {
 		var attached []interface{}
 		for _, val := range attachedParticlesystems {
@@ -431,7 +431,7 @@ func (this *item) getStyles() []string {
 	}
 
 	stylesMap := make(itemGameMap)
-	this.getSubAttribute("visuals.styles", &stylesMap);
+	this.getSubAttribute([]string{"visuals", "styles"}, &stylesMap);
 
 	for key, _ := range stylesMap {
 		styles = append(styles, key)
@@ -510,11 +510,9 @@ func (this *item) getStringMapSubAttribute(path []string, i *itemStringMap) {
 	}
 }
 
-func (this *item) getSubAttribute(attributePath string, i *itemGameMap) {
-	path := strings.Split(attributePath, ".")
-
+func (this *item) getSubAttribute(path []string, i *itemGameMap) {
 	for _, prefab := range this.prefabs {
-		prefab.getSubAttribute(attributePath, i)
+		prefab.getSubAttribute(path, i)
 	}
 
 	if kv, ok := this.kv.GetSubElement(path); ok {
