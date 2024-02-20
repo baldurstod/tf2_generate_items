@@ -1,0 +1,85 @@
+ "items_game"
+{
+	"items" {
+		"toolbox" {
+			"name" "Toolbox",
+			"image_inventory" "backpack/weapons/w_models/w_toolbox",
+			"item_slot" "force_building",
+			"used_by_classes" {
+				"engineer" "1"
+			},
+			"model_player" "models/weapons/c_models/c_toolbox/c_toolbox.mdl"
+		},
+		"191~1" {
+			"image_inventory" "backpack/weapons/w_models/w_bottle",
+			"item_slot" "melee",
+			"model_player" "models/weapons/c_models/c_bottle/c_bottle_broken.mdl",
+			"name" "Bottle (Broken)",
+			"used_by_classes" {
+				"demoman" "1"
+			}
+		},
+		"307~1" {
+			"name" "Ullapool Caber (Exploded)",
+			"image_inventory" "backpack/workshop/weapons/c_models/c_caber/c_caber",
+			"item_slot" "melee",
+			"used_by_classes" {
+				"demoman" "1"
+			},
+			"model_player" "models/workshop/weapons/c_models/c_caber/c_caber_exploded.mdl"
+		},
+		"357~1" {
+			"name" "Half-Zatoichi (Blood)",
+			"image_inventory" "backpack/workshop_partner/weapons/c_models/c_shogun_katana/c_shogun_katana",
+			"item_slot" "melee",
+			"used_by_classes" {
+				"soldier" "1"
+				"demoman" "1"
+			},
+			"model_player_per_class"
+			{
+				"soldier"	"models/workshop_partner/weapons/c_models/c_shogun_katana/c_shogun_katana_soldier.mdl"
+				"demoman"	"models/workshop_partner/weapons/c_models/c_shogun_katana/c_shogun_katana.mdl"
+			}
+			"visuals"
+			{
+				"skin"	"2"
+			}
+		},
+		"609~1" {
+			"name" "Scottish Handshake (Broken)",
+			"image_inventory" "backpack/workshop/weapons/c_models/c_scotland_shard/c_scotland_shard",
+			"item_slot" "melee",
+			"used_by_classes" {
+				"demoman" "1"
+			},
+			"model_player" "models/weapons/c_models/c_scotland_shard/c_scotland_shard_broken.mdl"
+		},
+		"813~1" {
+			"name" "Neon Annihilator (Broken)",
+			"image_inventory" "backpack/workshop_partner/weapons/c_models/c_sd_neonsign/c_sd_neonsign",
+			"item_slot" "melee",
+			"used_by_classes" {
+				"pyro" "1"
+			},
+			"model_player" "models/weapons/c_models/c_sd_neonsign/c_sd_neonsign_broken.mdl"
+		},
+		"9536" {
+			"name" "Paint kit tool",
+			"image_inventory" "",
+			"used_by_classes" {
+					"scout" "1",
+					"sniper" "1",
+					"soldier" "1",
+					"demoman" "1",
+					"medic" "1",
+					"heavy" "1",
+					"spy" "1",
+					"engineer" "1",
+					"pyro" "1"
+			},
+			"paintkit_base" "1",
+			"model_player"  "models/items/paintkit_tool.mdl"
+		}
+	}
+}
