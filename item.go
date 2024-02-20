@@ -70,6 +70,10 @@ func (this *item) toJSON(styleId string) itemGameMap {
 		}
 	}
 
+	if s, ok := this.getStringAttribute("name"); ok {
+		ret["game_name"] = s
+	}
+
 	for _, val := range ITEM_FIELDS {
 		if s, ok := this.getStringAttribute(val); ok {
 			if s != "" { //TODO: remove
