@@ -130,7 +130,7 @@ func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
 
 	if s, ok := it.getStringAttribute("baseitem"); ok {
 		if s == "1" {
-			if itemId != 26 && itemId != 27 {//destruction PDA and disguise kit
+			if itemId != 26 && itemId != 27 && itemId != 1152 {//destruction PDA, disguise kit, grappling hook
 				return true, "item is base item"
 			}
 		}
