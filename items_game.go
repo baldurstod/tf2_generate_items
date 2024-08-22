@@ -1,9 +1,10 @@
 package main
 
 import (
-	"strings"
-	"strconv"
 	"encoding/json"
+	"strconv"
+	"strings"
+
 	"github.com/baldurstod/vdf"
 )
 
@@ -17,13 +18,12 @@ type stringPair struct {
 }
 type collectionMap map[string]stringPair
 
-
 type itemsGame struct {
-	medals bool `default:false`
-	itemsVDF *vdf.KeyValue
-	staticVDF *vdf.KeyValue
-	Prefabs itemMap
-	Items itemMap
+	medals         bool `default:false`
+	itemsVDF       *vdf.KeyValue
+	staticVDF      *vdf.KeyValue
+	Prefabs        itemMap
+	Items          itemMap
 	itemCollection collectionMap
 }
 
@@ -43,7 +43,7 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 		//fmt.Println(len(styles))
 		if len(styles) > 1 {
 			for _, styleId := range styles {
-				items[itemId + "~" + styleId] = &itemStyle{it: item, styleId: styleId}
+				items[itemId+"~"+styleId] = &itemStyle{it: item, styleId: styleId}
 			}
 		} else {
 			items[itemId] = &itemStyle{it: item, styleId: "0"}
@@ -77,7 +77,7 @@ func (this *itemsGame) MarshalSystems() *itemGameMap {
 	return &systems
 }
 
-func (this *itemsGame) getItems() (*itemMap) {
+func (this *itemsGame) getItems() *itemMap {
 	items := make(itemMap)
 
 	for itemId, item := range this.Items {
@@ -130,7 +130,7 @@ func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
 
 	if s, ok := it.getStringAttribute("baseitem"); ok {
 		if s == "1" {
-			if itemId != 26 && itemId != 27 && itemId != 1152 {//destruction PDA, disguise kit, grappling hook
+			if itemId != 26 && itemId != 27 && itemId != 1152 && itemId != 1155 { //destruction PDA, disguise kit, grappling hook, passtime jack
 				return true, "item is base item"
 			}
 		}
