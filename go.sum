@@ -1,5 +1,3 @@
-github.com/baldurstod/vdf v0.0.0-20221017125858-20a08a36075b h1:nwUEAOzedbobclOkLSoc3ySc0kre69/BkdZaWOBtlCg=
-github.com/baldurstod/vdf v0.0.0-20221017125858-20a08a36075b/go.mod h1:Y6pGkfnBq0mndu8Fzpkm4c9wd16Kj89/3h6lFpaAldI=
 github.com/baldurstod/vdf v0.0.1 h1:McEchr6gkmsRKwfhH6KUkElqGQSJz6C7WysuOy5tGww=
 github.com/baldurstod/vdf v0.0.1/go.mod h1:Y6pGkfnBq0mndu8Fzpkm4c9wd16Kj89/3h6lFpaAldI=
 github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 h1:zN2lZNZRflqFyxVaTIU61KNKQ9C0055u9CAfpmqUvo4=
