@@ -1,36 +1,37 @@
 package main
 
 import (
+	"encoding/json"
 	_ "fmt"
 	_ "reflect"
 	"strconv"
 	"strings"
-	"encoding/json"
+
 	"github.com/baldurstod/vdf"
 )
 
-var ITEM_FIELDS = [...]string{"image_inventory", /*"item_class",*/ "item_slot"/*, /*"item_type_name"/*, "item_quality"*/, "holiday_restriction", "anim_slot", "particle_suffix", "extra_wearable"}
+var ITEM_FIELDS = [...]string{"image_inventory" /*"item_class",*/, "item_slot" /*, /*"item_type_name"/*, "item_quality"*/, "holiday_restriction", "anim_slot", "particle_suffix", "extra_wearable"}
 
 type item struct {
-	ig *itemsGame
-	Id string
-	ImageInventory string
-	ItemClass string
-	ItemName string
-	ItemQuality string
-	ItemSlot string
-	ItemTypeName string
-	ModelPlayer string
-	ModelPlayerPerClass itemStringMap
-	Name string
-	Prefab string
-	prefabs []*item
-	isPrefabsInitialized bool `default:false`
-	UsedByClasses map[string]int
-	kv *vdf.KeyValue
-	fakeStyle bool `default:false`
-	isCanteen bool `default:false`
-	hasOnlyExtraWearable bool `default:false`
+	ig                   *itemsGame
+	Id                   string
+	ImageInventory       string
+	ItemClass            string
+	ItemName             string
+	ItemQuality          string
+	ItemSlot             string
+	ItemTypeName         string
+	ModelPlayer          string
+	ModelPlayerPerClass  itemStringMap
+	Name                 string
+	Prefab               string
+	prefabs              []*item
+	isPrefabsInitialized bool
+	UsedByClasses        map[string]int
+	kv                   *vdf.KeyValue
+	fakeStyle            bool
+	isCanteen            bool
+	hasOnlyExtraWearable bool
 }
 
 func (this *item) toJSON(styleId string) itemGameMap {
@@ -107,12 +108,12 @@ func (this *item) toJSON(styleId string) itemGameMap {
 			}
 			ret["model_player"] = modelPlayer
 		} else {
-			ret["model_player"] = ""//TODO: remove me
+			ret["model_player"] = "" //TODO: remove me
 		}
 	}
 
 	if this.fakeStyle && !this.isCanteen && styleId == "1" {
-		ret["model_player"] = ""//TODO: remove me
+		ret["model_player"] = "" //TODO: remove me
 	}
 
 	// model_player_per_class
@@ -153,7 +154,7 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// equip_regions
 	var equipRegions = make(itemStringMap)
-	if sm, ok :=this.kv.GetStringMap("equip_regions"); ok {
+	if sm, ok := this.kv.GetStringMap("equip_regions"); ok {
 		for key, val := range *sm {
 			if val == "1" {
 				equipRegions[key] = "1"
@@ -418,7 +419,7 @@ func (this *item) toJSON(styleId string) itemGameMap {
 
 	// attached_particlesystems
 	attachedParticlesystems := make(itemGameMap)
-	this.getSubAttribute([]string{"visuals", "attached_particlesystems"}, &attachedParticlesystems);
+	this.getSubAttribute([]string{"visuals", "attached_particlesystems"}, &attachedParticlesystems)
 	if len(attachedParticlesystems) > 0 {
 		var attached []interface{}
 		for _, val := range attachedParticlesystems {
@@ -426,7 +427,6 @@ func (this *item) toJSON(styleId string) itemGameMap {
 		}
 		ret["attached_particlesystems"] = attached
 	}
-
 
 	return ret
 }
@@ -440,7 +440,7 @@ func (this *item) getStyles() []string {
 	}
 
 	stylesMap := make(itemGameMap)
-	this.getSubAttribute([]string{"visuals", "styles"}, &stylesMap);
+	this.getSubAttribute([]string{"visuals", "styles"}, &stylesMap)
 
 	for key, _ := range stylesMap {
 		styles = append(styles, key)
@@ -531,14 +531,13 @@ func (this *item) getSubAttribute(path []string, i *itemGameMap) {
 	}
 }
 
-
 func (this *item) getStringAttribute(attributeName string) (string, bool) {
 	if s, ok := this.kv.GetString(attributeName); ok {
 		return s, true
 	}
 
 	for _, prefab := range this.prefabs {
-		if s, ok := prefab.getStringAttribute(attributeName); ok && s != "0" {//TODO: remove s != "0"
+		if s, ok := prefab.getStringAttribute(attributeName); ok && s != "0" { //TODO: remove s != "0"
 			return s, true
 		}
 	}
@@ -576,7 +575,7 @@ func (this *item) getUsedByClasses() []string {
 }
 
 type itemStyle struct {
-	it *item
+	it      *item
 	styleId string
 }
 
@@ -587,10 +586,10 @@ func (this *itemStyle) MarshalJSON() ([]byte, error) {
 func (this itemGameMap) getMapStringValue(key string) (string, bool) {
 	if mapValue := this[key]; mapValue != nil {
 		switch mapValue.(type) {
-			case string:
-				return mapValue.(string), true
-			default:
-				return "", false
+		case string:
+			return mapValue.(string), true
+		default:
+			return "", false
 		}
 	}
 	return "", false
