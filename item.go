@@ -278,6 +278,11 @@ func (item *item) toJSON(styleId string) itemGameMap {
 		}
 	}
 
+	// taunt force weapon slot
+	if tauntForceWeaponSlot, ok := item.getStringSubAttribute("attributes.taunt force weapon slot.value"); ok {
+		ret["taunt_force_weapon_slot"] = tauntForceWeaponSlot
+	}
+
 	// attached_models_festive
 	if !item.hasOnlyExtraWearable || styleId == "0" {
 		if attachedModelsFestive, ok := item.getStringSubAttribute("visuals.attached_models_festive.0.model"); ok {
