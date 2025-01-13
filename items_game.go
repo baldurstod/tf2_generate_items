@@ -19,26 +19,25 @@ type stringPair struct {
 type collectionMap map[string]stringPair
 
 type itemsGame struct {
-	medals         bool `default:false`
+	medals         bool
 	itemsVDF       *vdf.KeyValue
-	staticVDF      *vdf.KeyValue
 	Prefabs        itemMap
 	Items          itemMap
 	itemCollection collectionMap
 }
 
-func (this *itemsGame) MarshalJSON() ([]byte, error) {
+func (itemsGame *itemsGame) MarshalJSON() ([]byte, error) {
 	ret := make(itemGameMap)
 
-	ret["items"] = *this.MarshalItems()
-	ret["systems"] = *this.MarshalSystems()
+	ret["items"] = *itemsGame.MarshalItems()
+	ret["systems"] = *itemsGame.MarshalSystems()
 
 	return json.Marshal(ret)
 }
 
-func (this *itemsGame) MarshalItems() *itemStyleMap {
+func (itemsGame *itemsGame) MarshalItems() *itemStyleMap {
 	items := make(itemStyleMap)
-	for itemId, item := range *this.getItems() {
+	for itemId, item := range *itemsGame.getItems() {
 		styles := item.getStyles()
 		//fmt.Println(len(styles))
 		if len(styles) > 1 {
@@ -53,10 +52,10 @@ func (this *itemsGame) MarshalItems() *itemStyleMap {
 	return &items
 }
 
-func (this *itemsGame) MarshalSystems() *itemGameMap {
+func (itemsGame *itemsGame) MarshalSystems() *itemGameMap {
 	systems := make(itemGameMap)
 
-	if particlesList, ok := this.itemsVDF.Get("attribute_controlled_attached_particles"); ok {
+	if particlesList, ok := itemsGame.itemsVDF.Get("attribute_controlled_attached_particles"); ok {
 		for _, particlesGroups := range particlesList.GetChilds() {
 			for _, particle := range particlesGroups.GetChilds() {
 				particleId := particle.Key
@@ -77,18 +76,18 @@ func (this *itemsGame) MarshalSystems() *itemGameMap {
 	return &systems
 }
 
-func (this *itemsGame) getItems() *itemMap {
+func (itemsGame *itemsGame) getItems() *itemMap {
 	items := make(itemMap)
 
-	for itemId, item := range this.Items {
-		if ok, _ := this.filterOut(item, !this.medals); !ok {
+	for itemId, item := range itemsGame.Items {
+		if ok, _ := itemsGame.filterOut(item, !itemsGame.medals); !ok {
 			items[itemId] = item
 		}
 	}
 	return &items
 }
 
-func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
+func (itemsGame *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
 	it.initPrefabs()
 
 	itemId, _ := strconv.Atoi(it.Id)
@@ -171,34 +170,34 @@ func (this *itemsGame) filterOut(it *item, filterMedals bool) (bool, string) {
 	return false, ""
 }
 
-func (this *itemsGame) init(dat []byte, staticDat []byte) {
+func (itemsGame *itemsGame) init(dat []byte, staticDat []byte) {
 	v := vdf.VDF{}
 	root := v.Parse(dat)
-	this.itemsVDF, _ = root.Get("items_game")
-	this.Prefabs = make(itemMap)
-	this.Items = make(itemMap)
-	this.itemCollection = make(collectionMap)
+	itemsGame.itemsVDF, _ = root.Get("items_game")
+	itemsGame.Prefabs = make(itemMap)
+	itemsGame.Items = make(itemMap)
+	itemsGame.itemCollection = make(collectionMap)
 
-	if prefabs, ok := this.itemsVDF.Get("prefabs"); ok {
+	if prefabs, ok := itemsGame.itemsVDF.Get("prefabs"); ok {
 		for _, val := range prefabs.GetChilds() {
 			var it = item{}
-			if it.init(this, val) {
-				this.Prefabs[it.Id] = &it
+			if it.init(itemsGame, val) {
+				itemsGame.Prefabs[it.Id] = &it
 			}
 		}
 	}
 
-	if items, ok := this.itemsVDF.Get("items"); ok {
+	if items, ok := itemsGame.itemsVDF.Get("items"); ok {
 		for _, val := range items.GetChilds() {
 			var it = item{}
-			if it.init(this, val) {
-				this.Items[it.Id] = &it
+			if it.init(itemsGame, val) {
+				itemsGame.Items[it.Id] = &it
 			}
 		}
 	}
 
 	// Static file is loaded after to overwrite items_game
-	if !this.medals {
+	if !itemsGame.medals {
 		v := vdf.VDF{}
 		staticRoot := v.Parse(staticDat)
 		staticItemsVDF, _ := staticRoot.Get("items_game")
@@ -206,22 +205,22 @@ func (this *itemsGame) init(dat []byte, staticDat []byte) {
 		if items, ok := staticItemsVDF.Get("items"); ok {
 			for _, val := range items.GetChilds() {
 				var it = item{}
-				if it.init(this, val) {
-					this.Items[it.Id] = &it
+				if it.init(itemsGame, val) {
+					itemsGame.Items[it.Id] = &it
 				}
 			}
 		}
 	}
 
-	if itemCollections, ok := this.itemsVDF.Get("item_collections"); ok {
+	if itemCollections, ok := itemsGame.itemsVDF.Get("item_collections"); ok {
 		for _, collection := range itemCollections.GetChilds() {
 
 			collectionName, _ := collection.GetString("name")
 			if collectionItems, ok := collection.Get("items"); ok {
 				for _, grade := range collectionItems.GetChilds() {
 					if gradeItems, ok := grade.ToStringMap(); ok {
-						for itemName, _ := range *gradeItems {
-							this.itemCollection[itemName] = stringPair{s1: collectionName, s2: grade.Key}
+						for itemName := range *gradeItems {
+							itemsGame.itemCollection[itemName] = stringPair{s1: collectionName, s2: grade.Key}
 						}
 					}
 				}
@@ -230,13 +229,13 @@ func (this *itemsGame) init(dat []byte, staticDat []byte) {
 	}
 }
 
-func (this *itemsGame) getPrefab(prefabName string) *item {
-	return this.Prefabs[prefabName]
+func (itemsGame *itemsGame) getPrefab(prefabName string) *item {
+	return itemsGame.Prefabs[prefabName]
 }
 
-func (this *itemsGame) getItemCollection(it *item) (string, string, bool) {
+func (itemsGame *itemsGame) getItemCollection(it *item) (string, string, bool) {
 	if s, ok := it.getStringAttribute("name"); ok {
-		if itemCollection, exists := this.itemCollection[s]; exists {
+		if itemCollection, exists := itemsGame.itemCollection[s]; exists {
 			return itemCollection.s1, itemCollection.s2, true
 		}
 	}
