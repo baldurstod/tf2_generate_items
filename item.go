@@ -10,7 +10,7 @@ import (
 	"github.com/baldurstod/vdf"
 )
 
-var ITEM_FIELDS = [...]string{"image_inventory" /*"item_class",*/, "item_slot" /*, /*"item_type_name"/*, "item_quality"*/, "holiday_restriction", "anim_slot", "particle_suffix", "extra_wearable"}
+var ITEM_FIELDS = [...]string{"image_inventory" /*"item_class",*/, "item_slot", "item_type_name" /*, "item_quality"*/, "holiday_restriction", "anim_slot", "particle_suffix", "extra_wearable"}
 
 type item struct {
 	ig                   *itemsGame
