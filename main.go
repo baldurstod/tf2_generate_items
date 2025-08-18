@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"os"
-	"log"
 	"flag"
 	"fmt"
+	"log"
+	"os"
 	"path"
 )
+
 var lg language
 
 func main() {
@@ -39,18 +40,35 @@ func main() {
 		os.Exit(1)
 	}
 
-	file, _ := os.OpenFile("var/log.log", os.O_WRONLY|os.O_CREATE, 0644)
+	var err error
+	file, err := os.OpenFile("var/log.log", os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	log.SetOutput(file)
 
 	lg = language{}
-	lg.init(path.Join(resourceFolder, "tf_" + lang + ".txt"))
+	if err := lg.init(path.Join(resourceFolder, "tf_"+lang+".txt")); err != nil {
+		log.Println(err)
+		return
+	}
 
 	ig := itemsGame{}
 	ig.medals = medals
-	dat, _ := os.ReadFile(path.Join(itemsFolder, "items_game.txt"))
+	dat, err := os.ReadFile(path.Join(itemsFolder, "items_game.txt"))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	dat2 := []byte{}
 	if staticFile != "" {
-		dat2, _ = os.ReadFile(staticFile)
+		dat2, err = os.ReadFile(staticFile)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}
 
 	ig.init(dat, dat2)
@@ -62,7 +80,7 @@ func main() {
 	} else {
 		prefix = "items"
 	}
-	os.WriteFile(outputFolder + prefix + "_" + lang + ".json", j, 0666)
+	os.WriteFile(path.Join(outputFolder, prefix+"_"+lang+".json"), j, 0666)
 }
 
 /*func getMap(i interface{}) itemGameMap {
@@ -76,7 +94,7 @@ func main() {
 func getStringToken(token string) string {
 	s, exist := lg.getToken(token)
 
-	if (exist) {
+	if exist {
 		return s
 	} else {
 		return token

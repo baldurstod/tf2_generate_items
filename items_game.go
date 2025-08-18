@@ -200,13 +200,15 @@ func (itemsGame *itemsGame) init(dat []byte, staticDat []byte) {
 	if !itemsGame.medals {
 		v := vdf.VDF{}
 		staticRoot := v.Parse(staticDat)
-		staticItemsVDF, _ := staticRoot.Get("items_game")
+		staticItemsVDF, ok := staticRoot.Get("items_game")
 
-		if items, ok := staticItemsVDF.Get("items"); ok {
-			for _, val := range items.GetChilds() {
-				var it = item{}
-				if it.init(itemsGame, val) {
-					itemsGame.Items[it.Id] = &it
+		if ok {
+			if items, ok := staticItemsVDF.Get("items"); ok {
+				for _, val := range items.GetChilds() {
+					var it = item{}
+					if it.init(itemsGame, val) {
+						itemsGame.Items[it.Id] = &it
+					}
 				}
 			}
 		}
