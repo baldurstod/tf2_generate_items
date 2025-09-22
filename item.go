@@ -154,6 +154,7 @@ func (item *item) toJSON(styleId string) itemGameMap {
 
 	// equip_regions
 	var equipRegions = make(itemStringMap)
+	var equipRegionsBug = make(itemStringMap)
 	if sm, ok := item.kv.GetStringMap("equip_regions"); ok {
 		for key, val := range *sm {
 			if val == "1" {
@@ -163,13 +164,14 @@ func (item *item) toJSON(styleId string) itemGameMap {
 	}
 
 	// equip_region
-	// sometimes equip_region is an array
+	// sometimes equip_region is an array. this is a bug. In this case,
+	// the game will not recognize any region, allowing to equip the item with anything
 	equipRegion := make(itemStringMap)
 	item.getStringMapAttribute("equip_region", &equipRegion)
 	if len(equipRegion) > 0 {
 		for key, val := range equipRegion {
 			if val == "1" {
-				equipRegions[key] = val
+				equipRegionsBug[key] = val
 			}
 		}
 	}
@@ -184,6 +186,17 @@ func (item *item) toJSON(styleId string) itemGameMap {
 			equip = append(equip, key)
 		}
 		ret["equip_regions"] = equip
+	}
+
+	// we export the key equip_region as an array in another key to keep track of them
+	if len(equipRegionsBug) > 0 {
+		equip := []string{}
+		for key := range equipRegionsBug {
+			equip = append(equip, key)
+		}
+		ret["equip_regions_bug"] = equip
+		// we also remove the original equip region, as the bug removes everything, prefab regions included
+		delete(ret, "equip_regions")
 	}
 
 	// paintable
