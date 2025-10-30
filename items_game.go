@@ -57,10 +57,13 @@ func (itemsGame *itemsGame) MarshalSystems() *itemGameMap {
 
 	if particlesList, ok := itemsGame.itemsVDF.Get("attribute_controlled_attached_particles"); ok {
 		for _, particlesGroups := range particlesList.GetChilds() {
+			groupId := particlesGroups.Key
+			group := make(itemGameMap)
+			systems[groupId] = group
 			for _, particle := range particlesGroups.GetChilds() {
 				particleId := particle.Key
 				particleSystem, _ := particle.ToStringMap()
-				systems[particleId] = particleSystem
+				group[particleId] = particleSystem
 
 				if s, ok := getStringTokenRaw("Attrib_Particle" + particleId); ok {
 					(*particleSystem)["name"] = s
