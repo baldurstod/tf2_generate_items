@@ -446,6 +446,12 @@ func (item *item) toJSON(styleId string) itemGameMap {
 		ret["attached_particlesystems"] = attached
 	}
 
+	if showInArmory, ok := item.getStringSubAttributeNoPrefabs("show_in_armory"); ok && showInArmory != "1" {
+		if item.Id != "1126" { // Duck Badge
+			ret["show_in_armory"] = showInArmory
+		}
+	}
+
 	return ret
 }
 
@@ -576,6 +582,18 @@ func (item *item) getStringSubAttribute(attributePath string) (string, bool) {
 			return s, true
 		}
 	}
+	return "", false
+}
+
+func (item *item) getStringSubAttributeNoPrefabs(attributePath string) (string, bool) {
+	path := strings.Split(attributePath, ".")
+
+	if kv, ok := item.kv.GetSubElement(path); ok {
+		if s, ok := kv.ToString(); ok {
+			return s, true
+		}
+	}
+
 	return "", false
 }
 
