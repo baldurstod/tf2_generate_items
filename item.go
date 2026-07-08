@@ -364,6 +364,11 @@ func (item *item) toJSON(styleId string) itemGameMap {
 		ret["use_smoke_particle_effect"] = useSmokeParticleEffect
 	}
 
+	// use_coin_particle_effect
+	if useCoinParticleEffect, ok := item.getStringSubAttribute("visuals.styles." + styleId + ".use_coin_particle_effect"); ok {
+		ret["use_coin_particle_effect"] = useCoinParticleEffect
+	}
+
 	// taunt_success_sound_loop
 	if tauntSuccessSoundLoop, ok := item.getStringSubAttribute("attributes.taunt success sound loop.value"); ok {
 		ret["taunt_success_sound_loop"] = tauntSuccessSoundLoop
